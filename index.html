@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Netduino-servo by danilolekovic</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Netduino-servo</h1>
+      <h2 class="project-tagline">Controlling a servo using the original Netduino.</h2>
+      <a href="https://github.com/danilolekovic/Netduino-Servo" class="btn">View on GitHub</a>
+      <a href="https://github.com/danilolekovic/Netduino-Servo/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/danilolekovic/Netduino-Servo/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="dual-servo-example-for-netduino" class="anchor" href="#dual-servo-example-for-netduino" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dual Servo Example for Netduino</h1>
+
+<p>Controlling a servo using the original Netduino. Repository created for educational purposes.</p>
+
+<h2>
+<a id="what-youll-need" class="anchor" href="#what-youll-need" aria-hidden="true"><span class="octicon octicon-link"></span></a>What You'll Need</h2>
+
+<p>Software:</p>
+
+<ul>
+<li><a href="http://www.netduino.com/downloads/">Netduino SDK</a></li>
+<li><a href="https://www.visualstudio.com/">Visual C# Express 2010</a></li>
+<li><a href="http://www.netduino.com/downloads/">Micro Framework</a></li>
+</ul>
+
+<p>Parts:</p>
+
+<ul>
+<li><a href="http://www.netduino.com/netduino/specs.htm">Netduino 1</a></li>
+<li>One (Two For This Tutorial) TowerPro SG51R Servos</li>
+<li>One Standard Breadboard</li>
+<li>Eight Wires</li>
+</ul>
+
+<h2>
+<a id="breadboard" class="anchor" href="#breadboard" aria-hidden="true"><span class="octicon octicon-link"></span></a>Breadboard</h2>
+
+<p><img src="http://i.imgur.com/WNE9Ufw.png" alt="See Breadboard.svg"></p>
+
+<h2>
+<a id="image" class="anchor" href="#image" aria-hidden="true"><span class="octicon octicon-link"></span></a>Image</h2>
+
+<p><img src="http://i.imgur.com/bhiqkrP.jpg" alt="Real-life Image"></p>
+
+<h2>
+<a id="code" class="anchor" href="#code" aria-hidden="true"><span class="octicon octicon-link"></span></a>Code</h2>
+
+<p>Servo API:</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">Servo</span>
+{
+    <span class="pl-k">protected</span> PWM <span class="pl-en">pwmServo</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+    <span class="pl-k">protected</span> <span class="pl-k">uint</span> <span class="pl-en">Position</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+
+    <span class="pl-k">public</span> <span class="pl-en">Servo</span>(<span class="pl-k">Cpu.PWMChannel</span> <span class="pl-smi">pin</span>)
+    {
+        pwmServo = <span class="pl-k">new</span> PWM(pin, <span class="pl-c1">20000</span>, Position, PWM.ScaleFactor.Microseconds, <span class="pl-c1">false</span>);
+        SetPositionStraight();
+        MoveServoLeft();
+    }
+
+    <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">SetPositionStraight</span>()
+    {
+        Position = <span class="pl-c1">1500</span>;
+    }
+
+    <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">Start</span>()
+    {
+        pwmServo.Start();
+    }
+
+    <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">MoveServoLeft</span>()
+    {
+        pwmServo.Duration = <span class="pl-c1">750</span>;
+    }
+
+    <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">MoveServoRight</span>()
+    {
+        pwmServo.Duration = <span class="pl-c1">2250</span>;
+    }
+}</pre></div>
+
+<p>Program:</p>
+
+<div class="highlight highlight-source-cs"><pre>Servo servo = <span class="pl-k">new</span> Servo(PWMChannels.PWM_PIN_D6);
+servo.Start();
+Servo servo2 = <span class="pl-k">new</span> Servo(PWMChannels.PWM_PIN_D9);
+servo2.Start();
+InputPort button = <span class="pl-k">new</span> InputPort(Pins.ONBOARD_BTN, <span class="pl-c1">false</span>, Port.ResistorMode.Disabled);
+<span class="pl-k">int</span> pos = <span class="pl-c1">0</span>;
+
+<span class="pl-k">while</span> (<span class="pl-c1">true</span>)
+{
+    <span class="pl-k">if</span> (button.Read())
+    {
+        <span class="pl-k">if</span> (pos == <span class="pl-c1">0</span>)
+        {
+            servo.MoveServoLeft();
+            servo2.MoveServoLeft();
+            pos = <span class="pl-c1">1</span>;
+        }
+        <span class="pl-k">else</span> <span class="pl-k">if</span> (pos == <span class="pl-c1">1</span>)
+        {
+            servo.MoveServoRight();
+            servo2.MoveServoRight();
+            pos = <span class="pl-c1">0</span>;
+        }
+    }
+}</pre></div>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/danilolekovic/Netduino-Servo">Netduino-servo</a> is maintained by <a href="https://github.com/danilolekovic">danilolekovic</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
